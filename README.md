@@ -7,7 +7,7 @@
 RCMusicControlEngine.getInstance().showDialog(getSupportFragmentManager(), new RCMusicKitListener());
 ```
 
-![alt(height=300)](../imgs/pic_2.png)
+![alt(height=300)](./imgs/pic_2.png)
 
 ## 实现 `RCMusicKitListener` 接口
 
