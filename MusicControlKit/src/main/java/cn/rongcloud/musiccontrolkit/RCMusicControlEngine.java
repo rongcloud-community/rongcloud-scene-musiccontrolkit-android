@@ -26,7 +26,6 @@ import cn.rongcloud.musiccontrolkit.iinterface.RCMusicKitListener;
  */
 public class RCMusicControlEngine extends AbsMusicEngine {
     private static final String TAG = RCMusicControlEngine.class.getSimpleName();
-    private static final Holder holder = new Holder();
 
     /**
      * 播放列表
@@ -57,7 +56,7 @@ public class RCMusicControlEngine extends AbsMusicEngine {
      * @return 音乐列表单例
      */
     public static RCMusicControlEngine getInstance() {
-        return holder.instance;
+        return Holder.INSTANCE;
     }
 
     public void showDialog(FragmentManager fragmentManager, RCMusicKitListener rcMusicKitListener) {
@@ -403,6 +402,6 @@ public class RCMusicControlEngine extends AbsMusicEngine {
     }
 
     private static class Holder {
-        private RCMusicControlEngine instance = new RCMusicControlEngine();
+        private static final RCMusicControlEngine INSTANCE = new RCMusicControlEngine();
     }
 }
