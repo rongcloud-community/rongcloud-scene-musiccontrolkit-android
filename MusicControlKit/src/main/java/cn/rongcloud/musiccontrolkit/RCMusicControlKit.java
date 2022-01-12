@@ -24,10 +24,8 @@ public class RCMusicControlKit extends RCKitInit<MusicControlKitConfig> {
 
     private static final String TAG = RCMusicControlKit.class.getSimpleName();
 
-    private final static Holder holder = new Holder();
-
     public static RCMusicControlKit getInstance() {
-        return holder.instance;
+        return Holder.INSTANCE;
     }
 
     @Override
@@ -75,6 +73,6 @@ public class RCMusicControlKit extends RCKitInit<MusicControlKitConfig> {
     }
 
     private static class Holder {
-        private RCMusicControlKit instance = new RCMusicControlKit();
+        private static final RCMusicControlKit INSTANCE = new RCMusicControlKit();
     }
 }
