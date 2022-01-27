@@ -33,7 +33,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.activity:activity:1.2.4'
 
-    compileOnly 'cn.rongcloud.sdk:rccorekit_lib:0.0.1'
+    compileOnly 'cn.rongcloud.sdk:rccorekit_lib:0.0.2'
 
     // CircleImageView https://github.com/hdodenhof/CircleImageView
     api 'de.hdodenhof:circleimageview:3.1.0'
