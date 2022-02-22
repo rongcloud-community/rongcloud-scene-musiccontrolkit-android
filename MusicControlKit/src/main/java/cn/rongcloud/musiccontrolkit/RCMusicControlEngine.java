@@ -44,12 +44,15 @@ public class RCMusicControlEngine extends AbsMusicEngine {
      */
     private MutableLiveData<List<String>> musicIdListLiveData;
 
+    private MutableLiveData<Boolean> isEarsBackEnable;
+
     private MusicControlDialog musicControlDialog;
 
     public RCMusicControlEngine() {
         musicListLiveData = new MutableLiveData<>();
         playingLiveData = new MutableLiveData<>();
         musicIdListLiveData = new MutableLiveData<>();
+        isEarsBackEnable = new MutableLiveData<>();
     }
 
     /**
@@ -77,6 +80,29 @@ public class RCMusicControlEngine extends AbsMusicEngine {
      */
     public MutableLiveData<Boolean> playingObserve() {
         return playingLiveData;
+    }
+
+    /**
+     * 监听耳返是否开启
+     *
+     * @return
+     */
+    public MutableLiveData<Boolean> earsBackObserve() {
+        return isEarsBackEnable;
+    }
+
+    /**
+     * 耳返是否可用
+     *
+     * @return
+     */
+    @Override
+    public boolean isEarsBackEnable() {
+        boolean enable = super.isEarsBackEnable();
+        if (isEarsBackEnable.getValue() == null || enable != isEarsBackEnable.getValue()) {
+            setEarsBackEnable(enable);
+        }
+        return enable;
     }
 
     /**
@@ -317,6 +343,22 @@ public class RCMusicControlEngine extends AbsMusicEngine {
             onPauseMixingWithMusic(playingMusic);
         }
         playingLiveData.postValue(isPlaying);
+    }
+
+    /**
+     * 设置耳返控制按钮是否开启
+     *
+     * @param enable
+     */
+    public void setEarsBackEnable(boolean enable) {
+        isEarsBackEnable.postValue(enable);
+    }
+
+    public boolean getEarsBackEnable() {
+        if (isEarsBackEnable.getValue() != null) {
+            return isEarsBackEnable.getValue();
+        }
+        return false;
     }
 
     /**

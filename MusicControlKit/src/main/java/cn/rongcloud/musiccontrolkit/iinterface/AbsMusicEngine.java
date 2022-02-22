@@ -194,6 +194,14 @@ public abstract class AbsMusicEngine implements RCMusicKitListener {
         rcMusicKitListener.onPlayEffect(effect);
     }
 
+    @Override
+    public boolean isEarsBackEnable() {
+        if (rcMusicKitListener == null) {
+            return false;
+        }
+        return rcMusicKitListener.isEarsBackEnable();
+    }
+
     public void release() {
         rcMusicKitListener = null;
     }

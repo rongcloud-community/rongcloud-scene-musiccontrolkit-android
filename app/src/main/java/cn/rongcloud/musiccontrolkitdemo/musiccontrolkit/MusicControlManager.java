@@ -38,8 +38,11 @@ import cn.rongcloud.rtc.api.IAudioEffectManager;
 import cn.rongcloud.rtc.api.RCRTCAudioMixer;
 import cn.rongcloud.rtc.api.RCRTCAudioMixer.MixingState;
 import cn.rongcloud.rtc.api.RCRTCAudioMixer.MixingStateReason;
+import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import cn.rongcloud.rtc.api.RCRTCEngine;
+import cn.rongcloud.rtc.api.callback.IRCRTCAudioRouteListener;
 import cn.rongcloud.rtc.api.callback.RCRTCAudioMixingStateChangeListener;
+import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import okhttp3.Response;
 
 /**
@@ -53,12 +56,45 @@ public class MusicControlManager extends RCRTCAudioMixingStateChangeListener imp
     private static MusicControl musicControl;
     // 缓存音乐文件的路径
     private String musicPath;
+    private RCAudioRouteType routeType;
 
     public MusicControlManager() {
         // 这里存到了cache缓存目录下，可根据自己需求存到其他地方
         musicPath = MyApplication.app.getCacheDir().getAbsolutePath() + "/rckit_music_cache/";
         RCRTCAudioMixer.getInstance().setAudioMixingStateChangeListener(this);
         musicControl = MusicLocalCache.getInstance().getMusicControl();
+        initRouteType();
+        RCRTCAudioRouteManager.getInstance().setOnAudioRouteChangedListener(new IRCRTCAudioRouteListener() {
+            @Override
+            public void onRouteChanged(RCAudioRouteType type) {
+                routeType = type;
+                boolean enable = earsBackEnable();
+                RCMusicControlEngine.getInstance().setEarsBackEnable(enable);
+                if (!enable) {
+                    onEarsBackEnableChanged(false);
+                }
+                VMLog.d(TAG, "onRouteChanged earsbackenable: " + enable + " type:" + type);
+            }
+
+            @Override
+            public void onRouteSwitchFailed(RCAudioRouteType fromType, RCAudioRouteType toType) {
+                VMLog.d(TAG, "onRouteSwitchFailed " + fromType + "->" + toType);
+            }
+        });
+    }
+
+    private void initRouteType() {
+        if (RCRTCAudioRouteManager.getInstance().hasHeadSet()) {
+            routeType = RCAudioRouteType.HEADSET;
+        } else if (RCRTCAudioRouteManager.getInstance().hasBluetoothA2dpConnected()) {
+            routeType = RCAudioRouteType.HEADSET_BLUETOOTH;
+        } else {
+            routeType = RCAudioRouteType.SPEAKER_PHONE;
+        }
+    }
+
+    private boolean earsBackEnable() {
+        return routeType == RCAudioRouteType.HEADSET || routeType == RCAudioRouteType.HEADSET_BLUETOOTH;
     }
 
     public static MusicControlManager getInstance() {
@@ -474,6 +510,15 @@ public class MusicControlManager extends RCRTCAudioMixingStateChangeListener imp
         VMLog.d(TAG, "onPlayEffect");
         RCRTCEngine.getInstance().getAudioEffectManager().stopAllEffects();
         RCRTCEngine.getInstance().getAudioEffectManager().playEffect(Integer.parseInt(effect.getSoundId()), 1, 50);
+    }
+
+    @Override
+    public boolean isEarsBackEnable() {
+        boolean enable = earsBackEnable();
+        if (!enable) {
+            ToastUtil.show("请连接耳机");
+        }
+        return enable;
     }
 
     /**

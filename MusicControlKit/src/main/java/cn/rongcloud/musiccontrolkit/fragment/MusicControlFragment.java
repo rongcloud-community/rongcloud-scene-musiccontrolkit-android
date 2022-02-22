@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ import java.util.List;
 import cn.rongcloud.corekit.api.DataCallback;
 import cn.rongcloud.corekit.base.RCFragment;
 import cn.rongcloud.corekit.core.RCKitInit;
+import cn.rongcloud.corekit.utils.ListUtil;
 import cn.rongcloud.corekit.utils.UiUtils;
 import cn.rongcloud.musiccontrolkit.R;
 import cn.rongcloud.musiccontrolkit.RCMusicControlEngine;
@@ -70,6 +72,18 @@ public class MusicControlFragment extends RCFragment<MusicControlKitConfig> {
                     controlItemList.add(new ControlItem("开启耳返", 0, true, musicControl.isEarsBackEnable()));
                     adapter.notifyDataSetChanged();
                 }
+            }
+        });
+
+        RCMusicControlEngine.getInstance().earsBackObserve().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if (!aBoolean) {
+                    if (ListUtil.isNotEmpty(controlItemList)) {
+                        controlItemList.get(controlItemList.size() - 1).isOpen = false;
+                    }
+                }
+                adapter.notifyDataSetChanged();
             }
         });
     }
@@ -162,13 +176,19 @@ public class MusicControlFragment extends RCFragment<MusicControlKitConfig> {
                 scSwitch.setVisibility(View.VISIBLE);
                 tvVolume.setVisibility(View.GONE);
                 sbProgress.setVisibility(View.GONE);
-                scSwitch.setChecked(controlItem.isOpen);
+                boolean checked = controlItem.isOpen && RCMusicControlEngine.getInstance().getEarsBackEnable();
+                scSwitch.setChecked(checked);
                 scSwitch.setOnClickListener(v -> {
-                    boolean isOpen = !controlItem.isOpen;
-                    controlItem.setOpen(isOpen);
-                    adapter.notifyDataSetChanged();
-                    RCMusicControlEngine.getInstance().onEarsBackEnableChanged(isOpen);
-
+                    if (RCMusicControlEngine.getInstance().isEarsBackEnable()) {
+                        boolean isOpen = !controlItem.isOpen;
+                        RCMusicControlEngine.getInstance().setEarsBackEnable(isOpen);
+                        controlItem.setOpen(isOpen);
+                        RCMusicControlEngine.getInstance().onEarsBackEnableChanged(isOpen);
+                    } else {
+                        controlItem.setOpen(false);
+                        RCMusicControlEngine.getInstance().setEarsBackEnable(false);
+                        controlItem.setOpen(false);
+                    }
                 });
             } else {
                 scSwitch.setVisibility(View.GONE);

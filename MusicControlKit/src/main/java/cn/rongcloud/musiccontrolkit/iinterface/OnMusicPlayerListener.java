@@ -53,4 +53,11 @@ public interface OnMusicPlayerListener {
      * @param effect 播放氛围
      */
     void onPlayEffect(Effect effect);
+
+    /**
+     * 正常情况连接耳机时才可以打开
+     *
+     * @return 耳返按钮是否可以打开
+     */
+    boolean isEarsBackEnable();
 }
