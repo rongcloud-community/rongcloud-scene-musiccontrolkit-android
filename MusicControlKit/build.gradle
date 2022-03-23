@@ -45,3 +45,4 @@ dependencies {
     implementation "com.scwang.smart:refresh-footer-classics:2.0.3"
 }
 //apply from: './bintray.gradle'
+//apply from: './central-bintray.gradle'
