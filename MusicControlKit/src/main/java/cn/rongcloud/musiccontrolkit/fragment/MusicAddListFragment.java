@@ -1,5 +1,7 @@
 package cn.rongcloud.musiccontrolkit.fragment;
 
+import static androidx.core.content.PermissionChecker.PERMISSION_GRANTED;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -13,11 +15,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Guideline;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +38,7 @@ import cn.rongcloud.corekit.core.RCKitInit;
 import cn.rongcloud.corekit.utils.GlideUtil;
 import cn.rongcloud.corekit.utils.ListUtil;
 import cn.rongcloud.corekit.utils.UiUtils;
+import cn.rongcloud.corekit.utils.VMLog;
 import cn.rongcloud.musiccontrolkit.R;
 import cn.rongcloud.musiccontrolkit.RCMusicControlEngine;
 import cn.rongcloud.musiccontrolkit.RCMusicControlKit;
@@ -51,18 +54,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MusicAddListFragment extends RCFragment<MusicControlKitConfig> {
     private static final String CATEGORY_ID = "CATEGORY_ID";
     private static final String IS_SEARCH = "IS_SEARCH";
-    private final ActivityResultLauncher mLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result -> {
-                        if (result != null
-                                && result.getData() != null
-                                && result.getData().getData() != null) {
-                            Uri uri = result.getData().getData();
-                            Music music = RCMusicControlEngine.getInstance().parseLocalMusic(uri);
-                            RCMusicControlEngine.getInstance().onSelectMusicFromLocal(music);
-                        }
-                    });
+    private static final int REQUEST_PERMISSION_CODE = 18899;
+    private static final int REQUEST_MEDIA_CODE = 17788;
+    private final String[] PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE};
     private RecyclerView rvMusicList;
     private ImageView emptyImageView;
     private MusicListAdapter adapter;
@@ -70,24 +65,6 @@ public class MusicAddListFragment extends RCFragment<MusicControlKitConfig> {
     private boolean isSearch;
     private List<Music> musicList = new ArrayList<>();
     private SmartRefreshLayout srlRefresh;
-    private final ActivityResultLauncher permissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                boolean allOk = true;
-                for (String item : result.keySet()) {
-                    try {
-                        boolean bOK = result.get(item);
-                        if (!bOK) {
-                            allOk = false;
-                            break;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (allOk) {
-                    launchFilePick();
-                }
-            });
     private ConstraintLayout clRoot;
     private MusicAddConfig musicAddConfig;
     private MusicItemConfig itemConfig;
@@ -242,14 +219,43 @@ public class MusicAddListFragment extends RCFragment<MusicControlKitConfig> {
                         "audio/3gpp")));
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        if (mLauncher != null) {
-            mLauncher.launch(intent);
+        startActivityForResult(intent, REQUEST_MEDIA_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        VMLog.e("====", "onActivityResult");
+        if (data != null
+                && data.getData() != null
+                && requestCode == REQUEST_MEDIA_CODE) {
+            Uri uri = data.getData();
+            Music music = RCMusicControlEngine.getInstance().parseLocalMusic(uri);
+            RCMusicControlEngine.getInstance().onSelectMusicFromLocal(music);
         }
     }
 
     private void requestStoragePermission() {
-        permissionLauncher.launch(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE});
+        requestPermissions(PERMISSIONS, REQUEST_PERMISSION_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        VMLog.e("====", "onRequestPermissionsResult");
+        if (requestCode != REQUEST_PERMISSION_CODE) {
+            return;
+        }
+        boolean allOk = true;
+        for (int grantResult : grantResults) {
+            if (grantResult != PERMISSION_GRANTED) {
+                allOk = false;
+                break;
+            }
+        }
+        if (allOk) {
+            launchFilePick();
+        }
     }
 
     class MusicListAdapter extends RecyclerView.Adapter<MusicItemViewHolder> {
@@ -333,7 +339,18 @@ public class MusicAddListFragment extends RCFragment<MusicControlKitConfig> {
                 ivAdd.setVisibility(View.VISIBLE);
                 ivAdd.setSelected(false);
                 ivAdd.setOnClickListener(v -> {
-                    requestStoragePermission();
+                    boolean hasPermission = true;
+                    for (String permission : PERMISSIONS) {
+                        if (ContextCompat.checkSelfPermission(getContext(), permission) != PERMISSION_GRANTED) {
+                            hasPermission = false;
+                            break;
+                        }
+                    }
+                    if (hasPermission) {
+                        launchFilePick();
+                    } else {
+                        requestStoragePermission();
+                    }
                 });
                 return;
             }
