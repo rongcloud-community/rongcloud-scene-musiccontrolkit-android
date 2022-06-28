@@ -53,9 +53,10 @@ dependencies {
     implementation 'cn.rongcloud.sdk:rccorekit_lib:0.0.1'
 
     // 模拟语聊房需要的库
-    implementation 'cn.rongcloud.sdk:voiceroom_lib:2.0.0'
-    implementation 'cn.rongcloud.sdk:im_lib:5.1.5'
-    implementation 'cn.rongcloud.sdk:rtc_lib:5.1.10'
+    implementation 'cn.rongcloud.sdk:voiceroom_lib:2.0.8'
+    implementation 'cn.rongcloud.sdk:im_lib:5.2.1.1'
+    implementation 'cn.rongcloud.sdk:rtc_lib:5.2.1'
+    implementation 'cn.rongcloud.sdk:player:5.2.1'
 
     // hifive音乐 需要的库 https://open.hifiveai.com/api/base/V4.1.2/baseClient/androidInterface/doc
     api "io.reactivex.rxjava2:rxjava:2.2.10"

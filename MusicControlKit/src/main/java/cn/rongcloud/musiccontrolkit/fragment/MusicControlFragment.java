@@ -178,8 +178,8 @@ public class MusicControlFragment extends RCFragment<MusicControlKitConfig> {
                 sbProgress.setVisibility(View.GONE);
                 boolean checked = controlItem.isOpen && RCMusicControlEngine.getInstance().getEarsBackEnable();
                 scSwitch.setChecked(checked);
-                scSwitch.setOnClickListener(v -> {
-                    if (RCMusicControlEngine.getInstance().isEarsBackEnable()) {
+                scSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (isChecked && RCMusicControlEngine.getInstance().isEarsBackEnable()) {
                         boolean isOpen = !controlItem.isOpen;
                         RCMusicControlEngine.getInstance().setEarsBackEnable(isOpen);
                         controlItem.setOpen(isOpen);
@@ -187,7 +187,7 @@ public class MusicControlFragment extends RCFragment<MusicControlKitConfig> {
                     } else {
                         controlItem.setOpen(false);
                         RCMusicControlEngine.getInstance().setEarsBackEnable(false);
-                        controlItem.setOpen(false);
+                        RCMusicControlEngine.getInstance().onEarsBackEnableChanged(false);
                     }
                 });
             } else {

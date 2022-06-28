@@ -4,8 +4,7 @@ import android.app.Application;
 
 import cn.rongcloud.corekit.api.RCSceneKitEngine;
 import cn.rongcloud.corekit.utils.VMLog;
-import cn.rongcloud.voiceroom.api.RCVoiceRoomEngine;
-import cn.rongcloud.voiceroom.api.callback.RCVoiceInitCallback;
+import io.rong.imlib.RongIMClient;
 
 /**
  * Created by gyn on 2021/11/15
@@ -24,12 +23,8 @@ public class MyApplication extends Application {
         VMLog.e(TAG, "init kit cost time: " + (System.currentTimeMillis() - millis));
         // demo 的依赖初始化
         // 初始化语聊房SDK
-        RCVoiceRoomEngine.getInstance().initWithAppKey(this, "kj7swf8ok3052", new RCVoiceInitCallback() {
-            @Override
-            public void onInitComplete() {
+        RongIMClient.init(this, "kj7swf8ok3052");
 
-            }
-        });
     }
 
 }

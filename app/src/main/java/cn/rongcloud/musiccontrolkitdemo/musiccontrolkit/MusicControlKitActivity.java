@@ -24,6 +24,7 @@ import cn.rongcloud.musiccontrolkitdemo.utils.ToastUtil;
 import cn.rongcloud.voiceroom.api.RCVoiceRoomEngine;
 import cn.rongcloud.voiceroom.api.callback.RCVoiceRoomCallback;
 import cn.rongcloud.voiceroom.model.RCVoiceRoomInfo;
+import io.rong.imlib.RongIMClient;
 
 /**
  * Created by gyn on 2021/11/25
@@ -102,33 +103,43 @@ public class MusicControlKitActivity extends AppCompatActivity {
     }
 
     private void connectUser1() {
-        RCVoiceRoomEngine.getInstance().disconnect(false);
-        RCVoiceRoomEngine.getInstance().connectWithToken(UserConstant.USER1.getToken(), new RCVoiceRoomCallback() {
+        RongIMClient.getInstance().disconnect();
+        RongIMClient.connect(UserConstant.USER1.getToken(), new RongIMClient.ConnectCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(String t) {
                 VMLog.d(TAG, "连接成功");
                 createAndJoinRoom();
             }
 
             @Override
-            public void onError(int i, String s) {
-                VMLog.e(TAG, "连接失败 " + i + ":" + s);
+            public void onError(RongIMClient.ConnectionErrorCode e) {
+                VMLog.e(TAG, "连接失败: " + e.toString());
+            }
+
+            @Override
+            public void onDatabaseOpened(RongIMClient.DatabaseOpenStatus code) {
+
             }
         });
     }
 
     private void connectUser2() {
-        RCVoiceRoomEngine.getInstance().disconnect(false);
-        RCVoiceRoomEngine.getInstance().connectWithToken(UserConstant.USER2.getToken(), new RCVoiceRoomCallback() {
+        RongIMClient.getInstance().disconnect();
+        RongIMClient.connect(UserConstant.USER2.getToken(), new RongIMClient.ConnectCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(String t) {
                 VMLog.d(TAG, "连接成功");
                 joinRoom();
             }
 
             @Override
-            public void onError(int i, String s) {
-                VMLog.e(TAG, "连接失败 " + i + ":" + s);
+            public void onError(RongIMClient.ConnectionErrorCode e) {
+                VMLog.e(TAG, "连接失败: " + e.toString());
+            }
+
+            @Override
+            public void onDatabaseOpened(RongIMClient.DatabaseOpenStatus code) {
+
             }
         });
     }
